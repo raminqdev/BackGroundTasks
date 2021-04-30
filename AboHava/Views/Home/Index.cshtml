@@ -1,0 +1,53 @@
+﻿@model IEnumerable<AboHava.Models.WeatherModel>
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>
+                    Name
+                </th>
+                <th>
+                    Temp
+                </th>
+                <th>
+                    TempMax
+                </th>
+                <th>
+                    TempMin
+                </th>
+                <th>
+                    Description
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+             {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Temp)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TempMax)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TempMin)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Description)
+                    </td>
+                </tr>
+             }
+        </tbody>
+    </table>
+</div>
