@@ -33,7 +33,7 @@ namespace HostedServices
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _timer = new Timer(async (state) => await GetWeatherData(state), null, 0, 10000); //every 10 seconds
+            _timer = new Timer(async (state) => await GetWeatherData(state), null, 0, 100000); //every 10 seconds
             return Task.CompletedTask;
         }
 
@@ -48,10 +48,7 @@ namespace HostedServices
         private async Task GetWeatherData(object state)
         {
             var weatherTasks = new ConcurrentBag<Task<WeatherModel>>();
-            GetIranCities().ForEach((city) =>
-            {
-                weatherTasks.Add(SendRequestByCityName(city));
-            });
+            GetIranCities().ForEach(city => weatherTasks.Add(SendRequestByCityName(city)));
             await Task.WhenAll(weatherTasks);
 
             var weatherModels = weatherTasks.Select(t => t.Result).ToList();
@@ -63,34 +60,57 @@ namespace HostedServices
 
         private async Task<WeatherModel> SendRequestByCityName(string city)
         {
-            var url = _configuration["Openweathermap:Api"].ToString() +
-                        $"?q={city},IR&units=metric&appid={_configuration["Openweathermap:AppId"]}&lang=fa";
-
-            HttpResponseMessage response = await _httpClient.GetAsync(url);
-            var responseContent = await response.Content.ReadAsStringAsync();
-            response.EnsureSuccessStatusCode();
-
-            var responseJObject = JsonConvert.DeserializeObject<JObject>(responseContent);
-
-            return new WeatherModel
+            try
             {
-                Name = Convert.ToString(responseJObject["name"]),
-                Description = Convert.ToString(responseJObject["weather"][0]["description"]),
-                Temp = Convert.ToDouble(responseJObject["main"]["temp"]),
-                TempMax = Convert.ToDouble(responseJObject["main"]["temp_max"]),
-                TempMin = Convert.ToDouble(responseJObject["main"]["temp_min"]) + DateTime.Now.Millisecond
-            };
+                var url = _configuration["Openweathermap:Api"].ToString() +
+                                       $"?q={city},IR&units=metric&appid={_configuration["Openweathermap:AppId"]}&lang=fa";
+
+
+                Console.WriteLine("Send Req :  " + city);
+                var responseContent = await _httpClient.GetStringAsync(url);
+                Console.WriteLine("Recieved   :  " + city);
+
+                var responseJObject = JsonConvert.DeserializeObject<JObject>(responseContent);
+
+                return new WeatherModel
+                {
+                    Name = Convert.ToString(responseJObject["name"]),
+                    Description = Convert.ToString(responseJObject["weather"][0]["description"]),
+                    Temp = Convert.ToDouble(responseJObject["main"]["temp"]),
+                    TempMax = Convert.ToDouble(responseJObject["main"]["temp_max"]),
+                    TempMin = Convert.ToDouble(responseJObject["main"]["temp_min"])
+                };
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(city);
+                Console.WriteLine(e);
+                return new WeatherModel();
+            }
         }
 
         private List<string> GetIranCities()
         {
             return new List<string>{
                 "Tehran",
-                "Qom",
-                "Tabriz",
+                "Mashhad",
                 "Isfahan",
+                "Karaj",
                 "Shiraz",
-                "Ahvaz"
+                "Tabriz",
+                "Qom",
+                "Ahvaz",
+                "Kermanshah",
+                "Urmia",
+                "Rasht",
+                "Zahedan",
+                "Hamadan",
+                "Kerman",
+                "Yazd",
+                "Ardabil",
+                "Bandar Abbas",
+                "Arak",
+                "Sari"
             };
         }
     }

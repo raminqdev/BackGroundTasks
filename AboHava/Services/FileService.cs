@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AboHava.Services
@@ -18,6 +19,7 @@ namespace AboHava.Services
             string path = Path.Combine(str, fileName);
             lock (lockObject)
             {
+                //Thread.Sleep(5000);
                 return File.WriteAllTextAsync(path, message);
             }
         }

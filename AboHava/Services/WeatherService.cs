@@ -1,6 +1,7 @@
 ﻿using AboHava.Models;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace AboHava.Services
@@ -18,7 +19,9 @@ namespace AboHava.Services
         {
             var stringResult = await _fileService.ReadFromFile();
 
-            return JsonConvert.DeserializeObject<IList<WeatherModel>>(stringResult);
+            var result = JsonConvert.DeserializeObject<IList<WeatherModel>>(stringResult);
+            
+            return result.OrderByDescending(w => w.Temp).ToList();
         }
     }
     public interface IWeatherService
